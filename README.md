@@ -5,37 +5,46 @@ and Lean Delivery's [AWS Core module](https://github.com/lean-delivery/tf-module
 
 ## How to use
 **0. get clean terraform service, go to "0_terraform_infra" and init terraform**
+
 ```
 terraform init
 ```
 
 **1. create "nonprod" workspace**
+
 ```
 terraform workspace new nonprod
 ```
 
 **2. create "prod" workspace**
+
 ```
 terraform workspace new prod
 ```
 
 *to select appropriate workspace*
+
 ```
 terraform workspace select nonprod
 ```
 
 **3. go to "0_terraform_infra/tfvars" and create a file "{project name}-{workspace}.tfvars":**
+
 ```
 nano nbcu-nonprod.tfvars
 ```
+
 *content of the file below:*
+
 ```
+
 project = "nbcu"
 environment = "nonprod"
 aws_region = "us-east-2"
 ```
 
 **4. apply changes with defined vars file, run below command on the level "0_terraform_infra"**
+
 ```
 terraform apply -var-file=tfvars/nbcu-nonprod.tfvars
 ```
@@ -44,15 +53,31 @@ terraform apply -var-file=tfvars/nbcu-nonprod.tfvars
 _*.hcl file should be created on the same level with "0_terraform_infra" and "1_core"_
 
 **5. go to "1_core" and init terraform also defined *.hcl file with backend configuration**
+
 ```
 terraform init -backend-config=../nbcu-nonprod.hcl
 ```
 
-**6. go to "1_core/tfvars" and create a file "{workspace name}-{aws region}.tfvars", example content is below**
+*or in VS Code console*
+
+```
+terraform init -backend-config="..\nbcu-nonprod.hcl"
+```
+
+**6. create a new workspace**
+
+```
+terraform workspace new nonprod
+```
+
+**7. go to "1_core/tfvars" and create a file "{workspace name}-{aws region}.tfvars", example content is below**
+
 ```
 nano nbcu-nonprod.tfvars
 ```
+
 *example content*
+
 ```
 project = "nbcu"
 
@@ -69,21 +94,52 @@ public_subnets = ["10.0.2.0/25", "10.0.2.128/25"]
 enable_nat_gateway = "true"
 ```
 
-**7. return to "1_core" and apply changes with defined vars file**
+**8. return to "1_core" and apply changes with defined vars file**
+
 ```
 terraform apply -var-file=tfvars/nonprod-us-east-2.tfvars
 ```
 
+*or in VS Code console*
+
+```
+terraform apply -var-file=".\tfvars\nonprod-us-east-2.tfvars"
+```
+
 **8. go to "2_shared_resources" and init terraform also defined *.hcl file with backend configuration**
+
 ```
 terraform init -backend-config=../nbcu-nonprod.hcl
 ```
 
-**9. go to "2_shared_resources/tfvars" and create a file "{workspace name}-{aws region}.tfvars", example content is below**
+*or in VS Code console*
+
+```
+terraform init -backend-config="..\nbcu-nonprod.hcl"
+```
+
+**9. create new workspaces**
+
+```
+terraform workspace new dev
+terraform workspace new qa
+terraform workspace new demo
+```
+
+**10. select appropriate workspace**
+
+```
+terraform workspace select dev
+```
+
+**11. go to "2_shared_resources/tfvars" and create a file "{workspace name}-{aws region}.tfvars", example content is below**
+
 ```
 nano nbcu-nonprod.tfvars
 ```
+
 *example content*
+
 ```
 project = "nbcu"
 environment = "nonprod"
@@ -95,12 +151,33 @@ aws_waf_web_acl_name = "WhiteListACL"
 aws_waf_web_acl_metric_name = "WhiteListACL"
 ```
 
-**10. return to "2_shared_resources" and apply changes with defined vars file**
+**12. return to "2_shared_resources" and apply changes with defined vars file**
+
 ```
 terraform apply -var-file=tfvars/nonprod-us-east-2.tfvars
 ```
 
-**11. to destroy infra run command:**
+*or in VS Code console*
+
+```
+terraform apply -var-file=".\tfvars\dev-us-east-2.tfvars"
+```
+
+**13. for all other workspace first set appropriate workspace and then apply with appropriate vars file**
+
+```
+terraform workspace select dev
+terraform apply -var-file=".\tfvars\dev-us-east-2.tfvars"
+
+terraform workspace select qa
+terraform apply -var-file=".\tfvars\qa-us-east-2.tfvars"
+
+terraform workspace select demo
+terraform apply -var-file=".\tfvars\demo-us-east-2.tfvars"
+```
+
+**14. to destroy infra run command:**
+
 ```
 terraform destroy -var-file=tfvars/nonprod-us-east-2.tfvars
 ```
